@@ -8,7 +8,7 @@ const client = new pg.Client(
 
 const createTables = async () => {
     const SQL = `
-  
+  DROP TABLE IF EXISTS restaurant_photos;
   DROP TABLE IF EXISTS reviews;
   DROP TABLE IF EXISTS favorites;
   DROP TABLE IF EXISTS restaurants;
@@ -43,6 +43,13 @@ const createTables = async () => {
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE
   );
+
+  CREATE TABLE restaurant_photos (
+    id uuid PRIMARY KEY,
+    restaurant_id uuid REFERENCES restaurants(id) ON DELETE CASCADE,
+    photo_url TEXT NOT NULL
+);
+
   `;
     await client.query(SQL);
 };
