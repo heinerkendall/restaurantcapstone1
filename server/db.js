@@ -11,6 +11,7 @@ const createTables = async () => {
   DROP TABLE IF EXISTS favorites;
   DROP TABLE IF EXISTS users;
   DROP TABLE IF EXISTS restaurants;
+  DROP TABLE IF EXISTS reviews;
   
   CREATE TABLE users(
   id uuid PRIMARY KEY,
@@ -20,8 +21,9 @@ const createTables = async () => {
   
   CREATE TABLE restaurants(
   id uuid PRIMARY KEY,
-  name VARCHAR(50)
-  );
+  name VARCHAR(50), 
+  description TEXT
+);
   
   CREATE TABLE favorites(
   id uuid PRIMARY KEY,
@@ -29,14 +31,27 @@ const createTables = async () => {
   user_id uuid REFERENCES users(id) NOT NULL,
   CONSTRAINT unique_product_user UNIQUE (product_id, user_id)
   );
+
+
+
+
+
   `;
     await client.query(SQL);
   };
   
-  const createProduct = async (name) => {
-    const SQL = `INSERT INTO restaurants(id, name) VALUES($1, $2) RETURNING *`;
-    const result = await client.query(SQL, [uuid.v4(), name]);
-    return result.rows[0];
+  const createRestaurant = async ({ name, description }) => {
+    try {
+      console.log("Attempting to insert restaurant:", { name, description });
+  
+      const SQL = `INSERT INTO restaurants(id, name, description) VALUES($1, $2, $3) RETURNING *`;
+      const result = await client.query(SQL, [uuid.v4(), name, description]);
+  
+      console.log("Inserted restaurant:", result.rows[0]);
+      return result.rows[0];
+    } catch (error) {
+      console.error("Error inserting restaurant:", error);
+    }
   };
   
   const createUser = async ({ username, password }) => {
@@ -62,9 +77,14 @@ const createTables = async () => {
   };
   
   const fetchRestaurants = async () => {
-    const SQL = `SELECT * FROM restaurants`;
-    result = await client.query(SQL);
-    return result.rows;
+    try {
+      const SQL = `SELECT * FROM restaurants`;
+      const result = await client.query(SQL);
+      console.table(result.rows);  // Log table for debugging
+      return result.rows;
+    } catch (error) {
+      console.error("Error fetching restaurants:", error);
+    }
   };
   
   const fetchFavorites = async (username) => {
@@ -80,19 +100,29 @@ const createTables = async () => {
     `;
     await client.query(SQL, [username, name]);
   };
+
+  
+
+
   
   const init = async () => {
     await client.connect();
     await createTables();
     await createUser({ username: "heinerkendall", password: "password" });
     await createUser({ username: "dannykopp", password: "password" });
-    console.table(await fetchUsers())
+  
+    await createRestaurant({ name: "chilis", description: "fast food" });
+  
+    console.table(await fetchUsers());
+    console.table(await fetchRestaurants());  
   };
+  
 
   
   module.exports = {
     init,
     createTables,
     createUser,
+    createRestaurant,
 
   };
