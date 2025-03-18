@@ -1,44 +1,37 @@
-import { react } from "react";
-import { BrowserRouter } from "BrowserRouter";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import Home from "./components/Home";
-import Account from "./components/Account";
 import Login from "./components/Login";
-import Navigation from "./components/Navigation";
 import Register from "./components/Register";
-import RestaurantDetails from "./components/RestaurantDetails";
+import Account from "./components/Account";
 import Restaurants from "./components/Restaurants";
-import SingleRestaurant from "./components/SingleRestaurant";
-
-
+import RestaurantDetails from "./components/RestaurantDetails";
 
 function App() {
   return (
     <Router>
-      <Navigation /> {}
+      <nav>
+        <ul>
+          <li><Link to="/">Home</Link></li>
+          <li><Link to="/restaurants">Restaurants</Link></li>
+          <li><Link to="/account">Account</Link></li>
+          <li><Link to="/login">Login</Link></li>
+          <li><Link to="/register">Register</Link></li>
+        </ul>
+      </nav>
       <Routes>
-        {/* Public Routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/restaurants" element={<Restaurants />} />
+        <Route path="/restaurants/:restaurantId" element={<RestaurantDetails />} />
+        <Route path="/account" element={<Account />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
-        {/* Restaurant Routes */}
-        <Route path="/restaurants" element={<Restaurants />} />
-        <Route path="/restaurants/:restaurantId" element={<SingleRestaurant />} />
-        
-        {/* Account Route */}
-        <Route path="/account" element={<Account />} />
-
-        {/* Restaurant Details Route */}
-        <Route path="/restaurant-details/:id" element={<RestaurantDetails />} />
-        
-        {/* 404 Page Not Found */}
-        <Route path="*" element={<div>Page Not Found</div>} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
 
 
 

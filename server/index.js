@@ -31,7 +31,7 @@ const authenticateUser = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token.replace("Bearer ", "testing-key"), SECRET_KEY);
+        const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
         req.user = decoded;
         next();
     } catch (err) {

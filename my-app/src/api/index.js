@@ -12,23 +12,23 @@ const handleResponse = async (response) => {
   return result;
 };
 
-export async function getBooks() {
+export async function getRestaurants() {
   try {
-    const response = await fetch(`${BASE_URL}/books`, { headers });
+    const response = await fetch(`${BASE_URL}/restaurants`, { headers });
     const result = await handleResponse(response);
-    return result.books;
+    return result.restaurants;
   } catch (error) {
-    console.error("Error fetching books:", error);
+    console.error("Error fetching restaurants:", error);
   }
 }
 
-export async function getBookId(bookId) {
+export async function getRestaurantId(Id) {
   try {
-    const response = await fetch(`${BASE_URL}/books/${bookId}`, { headers });
+    const response = await fetch(`${BASE_URL}/restaurants/${restaurantId}`, { headers });
     const result = await handleResponse(response);
-    return result.book;
+    return result.restaurants;
   } catch (error) {
-    console.error("Error fetching book:", error);
+    console.error("Error fetching restaurants:", error);
   }
 }
 
