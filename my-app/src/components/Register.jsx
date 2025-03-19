@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-
+import { useNavigate } from 'react-router-dom'; 
 export default function Register({ setToken }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate(); 
 
   const authenticate = async (token) => {
     try {
@@ -23,6 +24,7 @@ export default function Register({ setToken }) {
         setError(err.message);
     }
 };
+
 const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -50,6 +52,9 @@ const handleSubmit = async (e) => {
         setToken(data.token);
         localStorage.setItem("token", data.token);
         await authenticate(data.token);
+
+        
+        navigate("/account"); 
     } catch (err) {
         console.error("Register error:", err);
         setError(err.message || "An error occurred");

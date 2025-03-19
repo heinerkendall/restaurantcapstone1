@@ -52,3 +52,61 @@ const res = await fetch("http://localhost:6001/api/users/me", {
     method: "GET",
     headers: { "Authorization": "Bearer YOUR_TOKEN_HERE" }
 }).then(res => res.json()).then(console.log);}
+
+const saveRestaurant = async (restaurantId) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to save restaurants.");
+        return;
+      }
+  
+      const res = await fetch("http://localhost:6001/api/users/save-restaurant", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+        body: JSON.stringify({ restaurantId }),
+      });
+  
+      const data = await res.json();
+      if (res.ok) {
+        alert("Restaurant saved successfully!");
+      } else {
+        alert(data.message); 
+      }
+    } catch (err) {
+      console.error("Error saving restaurant:", err);
+    }
+  };
+  
+
+// const saveRestaurant = async (restaurantId) => {
+//     const token = localStorage.getItem("token"); 
+  
+//     if (!token) {
+//       console.error("You must be logged in to save a restaurant");
+//       return;
+//     }
+  
+//     try {
+//       const res = await fetch("/api/users/save-restaurant", {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           "Authorization": `Bearer ${token}`, 
+//         },
+//         body: JSON.stringify({ restaurantId }),
+//       });
+  
+//       const data = await res.json();
+//       if (res.ok) {
+//         console.log(data.message); 
+//       } else {
+//         console.error(data.message);
+//     } catch (err) {
+//       console.error("Error saving restaurant:", err);
+//     }
+// };
+// }

@@ -1,63 +1,48 @@
-export default function Account() {
-    return <h1>Account Page</h1>;
-}
+import { useEffect, useState } from "react";
 
-// import { useState, useEffect } from "react";
-// import SingleRestaurant from "./SingleRestaurant";
+const Account = () => {
+  const [savedRestaurants, setSavedRestaurants] = useState([]);
+  const [error, setError] = useState(null);
 
-// // export default function Account({ token, getData }) {
+  useEffect(() => {
+    fetchSavedRestaurants();
+  }, []);
 
-//   const [userName, setUsername] = useState(null);
-//   const [useruserRestaurant, setUserRestaurant] = useState([]);
-//   const [userInfo, setUserInfo] = useState({});
+  const fetchSavedRestaurants = async () => {
+    try {
+      const response = await fetch("http://localhost:6001/api/users/saved-restaurants", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      });
 
-// //   useEffect(() => {
-// //     async function userData() {
-// //       const apiToken = token;
-// //       try {
-// //         const response = await fetch(
-// //           "http://localhost:4000/api/users/me",
-// //           {
-// //             headers: {
-// //               "Content-Type": "application/json",
-// //               Authorization: `Bearer ${apiToken}`,
-// //             },
-// //           }
-// //         );
-// //         const result = await response.json();
-// //         setUserInfo(result);
-// //         setUser(result.email);
-// //         setUserRestaurant(result.Restaurant);
-// //       } catch (error) {
-// //         setError(error.message);
-// //       }
-// //     }
-// //     userData();
-// //   }, [token]);
+      if (!response.ok) {
+        throw new Error("Failed to fetch saved restaurants");
+      }
 
-// //   return (
-// //     <div className="userInfo">
-// //       <h1>Welcome to Kendall's Resturaunt Review Hub {userName}</h1>
-// //       <h2>{userInfo.email}</h2>
-// //       <h3>Your reserved books:</h3>
-// //       <div className="books">
-// //         <div className="singlebook">
-// //           {userResturaunt &&
-// //             userResturaunt.map((restaurant) => (
-// //               <SingleRestaurant
-// //                 key={restaurant.id}
-// //                 restaurant={restaurant}
-// //                 pageName={"account"}
-// //                 getData={getData}
-// //                 token={token}
-// //                 userResturaunt={userResturaunt}
-// //                 setUserRestaurant={setUserRestaurant}
-// //               />
-// //             ))}
-// //         </div>
-// //       </div>
-// //     </div>
-// //   );
-// // }
+      const data = await response.json();
+      setSavedRestaurants(data);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
+  return (
+    <div>
+      <h2>Your Account</h2>
+      <h3>Saved Restaurants</h3>
+      {error && <p>{error}</p>}
+      <ul>
+        {savedRestaurants.length > 0 ? (
+          savedRestaurants.map((restaurant) => (
+            <li key={restaurant.id}>
+              <strong>{restaurant.name}</strong> - {restaurant.location}
+            </li>
+          ))
+        ) : (
+          <p>No saved restaurants.</p>
+        )}
+      </ul>
+    </div>
+  );
+};
 
+export default Account;
