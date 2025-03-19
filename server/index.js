@@ -1,131 +1,132 @@
-const express = require("express");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const { 
-    init, 
-    createUser, 
-    fetchUsers, 
-    fetchRestaurants, 
-    fetchReviews 
-} = require("./db");
+const express = require('express');
+const bcrypt = require('bcrypt');
+const { client, init } = require('./db');
+const uuid = require('uuid');
+const db = require("./db");
+const cors = require("cors");
+
 
 const app = express();
 const port = 4000;
-const SECRET_KEY = "supersecretkey"; 
 
-app.use(express.json()); 
+app.use(express.json());
+app.use(cors());
 
-// Initialize db
+// Middleware to parse JSON
+app.use(express.json());
+
+// User Routes
+app.post('/users', async (req, res) => {
+  const { username, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+  
+  const SQL = 'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *';
+  const result = await client.query(SQL, [username, hashedPassword]);
+  res.status(201).json(result.rows[0]);
+});
+
+app.get('/users', async (req, res) => {
+  const result = await client.query('SELECT * FROM users');
+  res.json(result.rows);
+});
+
+app.post("/api/users/register", async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+    
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const SQL = `INSERT INTO users(username, password) VALUES($1, $2) RETURNING *`;
+    const result = await client.query(SQL, [username, hashedPassword]);
+
+    res.json(result.rows[0]);
+  } catch (ex) {
+    next(ex);
+  }
+});
+
+app.post("/api/users/login", async (req, res, next) => {
+  try {
+    const { username, password } = req.body;
+
+    const SQL = "SELECT * FROM users WHERE username = $1";
+    const result = await client.query(SQL, [username]);
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(401).json({ error: "Invalid username or password username" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(401).json({ error: "Invalid username or password" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, username: user.username },
+      SECRET_KEY,
+      { expiresIn: "1h" }
+    );
+
+    res.json({ message: "Login successful", token, user });
+  } catch (error) {
+    next(error);
+  }
+});
+// Restaurant Routes
+app.post('/restaurants', async (req, res) => {
+  const { name, description } = req.body;
+
+  const SQL = 'INSERT INTO restaurants (name, description) VALUES ($1, $2) RETURNING *';
+  const result = await client.query(SQL, [name, description]);
+  res.status(201).json(result.rows[0]);
+});
+
+app.get('/restaurants', async (req, res) => {
+  const result = await client.query('SELECT * FROM restaurants');
+  res.json(result.rows);
+});
+
+// // Favorites Routes
+// app.post('/favorites', async (req, res) => {
+//   const { user_id, restaurant_id } = req.body;
+
+//   const SQL = `
+//     INSERT INTO favorites (user_id, restaurant_id)
+//     VALUES ($1, $2) 
+//     ON CONFLICT (user_id, restaurant_id) DO NOTHING
+//     RETURNING *
+//   `;
+//   const result = await client.query(SQL, [user_id, restaurant_id]);
+  
+//   if (result.rows.length === 0) {
+//     return res.status(400).json({ message: 'Favorite already exists' });
+//   }
+
+//   res.status(201).json(result.rows[0]);
+// });
+
+// app.delete('/favorites', async (req, res) => {
+//   const { user_id, restaurant_id } = req.body;
+
+//   const SQL = 'DELETE FROM favorites WHERE user_id = $1 AND restaurant_id = $2 RETURNING *';
+//   const65 result = await client.query(SQL, [user_id, restaurant_id]);
+
+//   if (result.rows.length === 0) {
+//     return res.status(404).json({ message: 'Favorite not found' });
+//   }
+
+//   res.status(200).json({ message: 'Favorite removed successfully' });
+// });
+
+// Start the server
 init()
-    .then(() => console.log("Database initialized"))
-    .catch(err => console.error("Error initializing database", err));
-
-//  AUTHENTICATION MIDDLEWARE 
-
-// Middleware to authenticate users
-const authenticateUser = (req, res, next) => {
-    const token = req.header("Authorization");
-
-    if (!token) {
-        return res.status(401).json({ error: "Access denied. No token provided." });
-    }
-
-    try {
-        const decoded = jwt.verify(token.replace("Bearer ", ""), SECRET_KEY);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        res.status(400).json({ error: "Invalid token." });
-    }
-};
-
-// USER ENDPOINTS
-
-// Register a new user
-app.post("/users/register", async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        const newUser = await createUser({ username, password });
-        res.status(201).json({ message: "User created successfully", user: newUser });
-    } catch (err) {
-        console.error("Error creating user:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// User login and JWT token generation
-app.post("/users/login", async (req, res) => {
-    const { username, password } = req.body;
-
-    try {
-        const users = await fetchUsers();
-        const user = users.find(u => u.username === username);
-
-        if (!user) {
-            return res.status(400).json({ error: "Invalid username or password" });
-        }
-
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(400).json({ error: "Invalid username or password" });
-        }
-
-        const token = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: "1h" });
-        res.json({ message: "Login successful", token });
-    } catch (err) {
-        console.error("Error logging in:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// Get current user 
-app.get("/users/me", authenticateUser, async (req, res) => {
-    res.json({ user: req.user });
-});
-
-// RESTAURANT ENDPOINTS 
-
-// Get all restaurants 
-app.get("/restaurants", authenticateUser, async (req, res) => {
-    try {
-        const restaurants = await fetchRestaurants();
-        res.json(restaurants);
-    } catch (err) {
-        console.error("Error fetching restaurants:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// Get a single restaurant by ID 
-app.get("/restaurants/:restaurantId", authenticateUser, async (req, res) => {
-    res.status(501).json({ message: "Fetching a single restaurant not implemented yet" });
-});
-
-// Update restaurant details (PATCH) 
-app.patch("/restaurants/:restaurantId", authenticateUser, async (req, res) => {
-    res.status(501).json({ message: "Updating a restaurant not implemented yet" });
-});
-
-//  REVIEWS ENDPOINTS 
-
-// Get all reviews 
-app.get("/reviews", authenticateUser, async (req, res) => {
-    try {
-        const reviews = await fetchReviews();
-        res.json(reviews);
-    } catch (err) {
-        console.error("Error fetching reviews:", err);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-// Delete a review 
-app.delete("/reviews/:reviewId", authenticateUser, async (req, res) => {
-    res.status(501).json({ message: "Deleting a review not implemented yet" });
-});
-
-
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+  .then(() => {
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`);
+    });
+  })
+  .catch((error) => {
+    console.error('Error initializing database:', error);
+  });

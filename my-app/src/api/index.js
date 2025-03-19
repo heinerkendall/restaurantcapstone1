@@ -46,3 +46,18 @@ export async function Login(formData) {
     setError(error.message);
   }
 }
+
+export async function Register (formData) {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/register`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(formData),
+    });
+    const result = await handleResponse(response);
+    return result.token;
+  } catch (error) {
+    console.error("Having Trouble Registering ", error);
+    setError(error.message);
+  }
+}
