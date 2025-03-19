@@ -1,6 +1,6 @@
-export default function Account() {
-    return <h1>Account Page</h1>;
-}
+// export default function Account() {
+//     return <h1>Account Page</h1>;
+// }
 
 // import { useState, useEffect } from "react";
 // import SingleRestaurant from "./SingleRestaurant";
