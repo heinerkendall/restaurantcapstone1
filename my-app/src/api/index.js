@@ -33,16 +33,22 @@ const handleResponse = async (response) => {
 // }
 
 export async function Login(formData) {
-  try {
-    const response = await fetch(`${BASE_URL}/users/login`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(formData),
+    const res = await fetch("http://localhost:6001/api/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: formData.username, password: formData.password }), // Match with register
     });
-    const result = await handleResponse(response);
-    return result.token;
-  } catch (error) {
-    console.error("Having Trouble Logging you in", error);
-    setError(error.message);
-  }
-}
+
+    if (!res.ok) {
+        throw new Error("Invalid credentials");
+    }
+
+    const data = await res.json();
+    return data.token;
+
+}export async function Register(formData) {
+
+const res = await fetch("http://localhost:6001/api/users/me", {
+    method: "GET",
+    headers: { "Authorization": "Bearer YOUR_TOKEN_HERE" }
+}).then(res => res.json()).then(console.log);}

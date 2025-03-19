@@ -14,16 +14,27 @@ export default function LoginForm({ setToken }) {
   async function handleSubmit(e) {
     e.preventDefault();
 
-   
     try {
-      const token = await Login(formData); 
-      setToken(token); 
-      localStorage.setItem("token", token); 
-      navigate("/account"); 
+        const res = await fetch("http://localhost:6001/api/users/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: formData.email, password: formData.password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            throw new Error(data.message || "Login failed");
+        }
+
+        setToken(data.token);
+        localStorage.setItem("token", data.token);
+        navigate("/account");
     } catch (error) {
-      setNameError("Incorrect Email or Password");
+        console.error("Login error:", error);
+        setNameError(error.message);
     }
-  }
+}
 
   return (
     <>

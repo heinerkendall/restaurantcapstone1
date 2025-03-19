@@ -9,7 +9,7 @@ import RestaurantDetails from "./components/RestaurantDetails";
 
 
 function App() {
-  const [token, setToken] = useState(null); 
+  const [token, setToken] = useState(localStorage.getItem("token") || "");
 
   return (
     <Router>
@@ -28,8 +28,7 @@ function App() {
         <Route path="/restaurants" element={<Restaurants />} />
         <Route path="/restaurants/:restaurantId" element={<RestaurantDetails />} />
         <Route path="/account" element={<Account />} />
-        <Route path="/login" element={<Login />} />
-
+        <Route path="/login" element={<Login setToken={setToken} />} />
         <Route path="/register" element={<Register setToken={setToken} />} />
       </Routes>
       
