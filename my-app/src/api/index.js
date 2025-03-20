@@ -12,38 +12,18 @@ const handleResponse = async (response) => {
   return result;
 };
 
-// export async function getRestaurants() {
-//   try {
-//     const response = await fetch(`${BASE_URL}/`, { headers });
-//     const result = await handleResponse(response);
-//     return result.books;
-//   } catch (error) {
-//     console.error("Error fetching books:", error);
-//   }
-// }
 
-// export async function getRestaurantId(restaurantId) {
-//   try {
-//     const response = await fetch(`${BASE_URL}/books/${bookId}`, { headers });
-//     const result = await handleResponse(response);
-//     return result.book;
-//   } catch (error) {
-//     console.error("Error fetching book:", error);
-//   }
-// }
 
-export async function Login(formData) {
+export async function Login(credentials) {
     const res = await fetch("http://localhost:6001/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: formData.username, password: formData.password }), // Match with register
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(credentials),
     });
-
-    if (!res.ok) {
-        throw new Error("Invalid credentials");
-    }
-
+  
     const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Login failed");
+  
     return data.token;
 
 }export async function Register(formData) {
@@ -82,31 +62,3 @@ const saveRestaurant = async (restaurantId) => {
   };
   
 
-// const saveRestaurant = async (restaurantId) => {
-//     const token = localStorage.getItem("token"); 
-  
-//     if (!token) {
-//       console.error("You must be logged in to save a restaurant");
-//       return;
-//     }
-  
-//     try {
-//       const res = await fetch("/api/users/save-restaurant", {
-//         method: "POST",
-//         headers: {
-//           "Content-Type": "application/json",
-//           "Authorization": `Bearer ${token}`, 
-//         },
-//         body: JSON.stringify({ restaurantId }),
-//       });
-  
-//       const data = await res.json();
-//       if (res.ok) {
-//         console.log(data.message); 
-//       } else {
-//         console.error(data.message);
-//     } catch (err) {
-//       console.error("Error saving restaurant:", err);
-//     }
-// };
-// }

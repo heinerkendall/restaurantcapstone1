@@ -1,3 +1,3 @@
-export default function RestaurantDetails() {
-    return <h1>RestaurantDetails</h1>;
-  }
+export default function RestaurantDetails(){
+    return <h1>Restaurant Details</h1>;
+}

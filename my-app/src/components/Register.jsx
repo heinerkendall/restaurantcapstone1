@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 export default function Register({ setToken }) {
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const [passwordError, setPasswordError] = useState('');
@@ -34,7 +34,7 @@ const handleSubmit = async (e) => {
         const res = await fetch("http://localhost:6001/api/users/register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: email, password }),
+            body: JSON.stringify({ username, password }),
         });
 
         const data = await res.json();
@@ -70,11 +70,11 @@ const handleSubmit = async (e) => {
 
       <form onSubmit={handleSubmit} className="form">
         <label>
-          Email:
+          Username:
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
         </label>
         <br />
