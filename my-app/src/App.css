@@ -41,20 +41,38 @@ body{
   margin-right: 800px; 
 }
 
-.restauraunt-grid{
+.restaurant-grid {
   display: grid;
-  grid-template-columns: repeat(3,1fr);
-  gap: 20px;
-  padding: 0;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 20px; 
   list-style-type: none;
+  padding: 0;
 }
 
-.restaurant-card{
-  background-color: rgb(105, 163, 28);
-  padding: 15px;
+.restaurant-card {
+  border: 1px solid #273706;
+  padding: 10px;
   text-align: center;
+  background-color: #62a822;
+}
+
+.restaurant-card img {
+  width: 100%;
+  height: auto;
   border-radius: 8px;
-  
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
 }
 
 .restaurant-card:hover{
